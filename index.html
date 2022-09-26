@@ -74,6 +74,7 @@
       const glyph_size = 12;
       const max_columns = Math.ceil(window.innerWidth / glyph_size);
       const max_rows = Math.ceil(window.innerHeight / glyph_size);
+      const glyphs = [];
       for(let c = 1; c < max_columns; c++){
         const column_el = this.createNode(this.root,'span');
         const drop_position = Math.floor(Math.random()*max_rows);
@@ -81,8 +82,15 @@
         for(let r = 1; r < max_rows; r++){
           const glyph = new Glyph({ column: c, max_rows: max_rows, position: r, drop_speed: drop_speed, drop_position: drop_position });
           const glyph_el = this.createNode(column_el,'span');
-          this.handleGlyphStep(glyph_el,glyph);
-          this.handleGlyphDrop(glyph_el,glyph);
+          glyphs.push({ node: glyph_el, glyph: glyph });
+          // this.handleGlyphStep(glyph_el,glyph);
+          // this.handleGlyphDrop(glyph_el,glyph);
+        }
+        if(c === max_columns - 1){
+          glyphs.forEach(glyph => {
+            this.handleGlyphStep(glyph.node,glyph.glyph);
+            this.handleGlyphDrop(glyph.node,glyph.glyph);
+          })
         }
       }
     }
