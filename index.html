@@ -3,11 +3,11 @@
   <head>
     <meta charset="utf-8">
     <title>Matrix</title>
-    <link rel="preload" href="matrix.ttf" as="font" type="font/truetype" crossorigin>
+    <link rel="preload" href="matrix.ttf" as="font" type="font/ttf">
     <style media="screen">
       @font-face { font-family: matrix; src: url(matrix.ttf); }
       html,body { margin: 0; background: #000; overflow: hidden;}
-      #root { position: relative; overflow: hidden; font-family: matrix; display: flex; align-items: center; justify-content: center; flex-wrap: nowrap; }
+      #root { color: rgb(182,255,161); position: relative; overflow: hidden; font-family: matrix; display: flex; align-items: center; justify-content: center; flex-wrap: nowrap; }
       #root > span { position: relative; }
       #root > span > span { font-size: 11px; width: 12px; height: 12px; display: flex; align-items: center; justify-content: center; }
     </style>
@@ -53,6 +53,9 @@
         if(this.position === 11 && this.column === 1) return ' '
         return this.glyphs[this.current];
       }
+      get(){
+        return this.glyphs[this.current];
+      }
     }
     class Matrix {
       constructor(){
@@ -82,13 +85,12 @@
           for(let r = 1; r < max_rows; r++){
             const glyph = new Glyph({ column: c, max_rows: max_rows, position: r, drop_speed: drop_speed, drop_position: drop_position });
             const glyph_el = this.createNode(column_el,'span');
+            glyph_el.innerHTML = glyph.get();
             glyphs.push({ node: glyph_el, glyph: glyph });
-            // this.handleGlyphStep(glyph_el,glyph);
-            // this.handleGlyphDrop(glyph_el,glyph);
           }
           if(c === max_columns - 1){
             glyphs.forEach(glyph => {
-              this.handleGlyphStep(glyph.node,glyph.glyph);
+              // this.handleGlyphStep(glyph.node,glyph.glyph);
               this.handleGlyphDrop(glyph.node,glyph.glyph);
             })
           }
