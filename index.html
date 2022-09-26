@@ -35,7 +35,8 @@
         this.position = options.position;
         this.max_rows = options.max_rows;
         this.drop_position = Math.floor(Math.random()*this.max_rows);
-        this.drop_speed = Math.floor(Math.random() * (100 - 30) + 30);
+        // this.drop_speed = Math.floor(Math.random() * (100 - 30) + 30);
+        this.drop_speed = Math.random() * (0.5 - 0.1) + 0.1;
         this.glyphs = [];
         for(let r = 1; r < this.max_rows; r++){
           const glyph = new Glyph({ position: r });
@@ -44,20 +45,27 @@
           glyph_el.style.color = 'transparent';
           this.glyphs.push({ node: glyph_el, glyph: glyph });
         }
-        this.interval = setInterval(async () => {
-          this.drop();
-        }, this.drop_speed )
+        window.requestAnimationFrame(this.handleRequestAnimationFrame.bind(this))
+        // this.interval = setInterval(async () => {
+        // }, this.drop_speed )
+      }
+      handleRequestAnimationFrame(){
+        this.drop();
+        window.requestAnimationFrame(this.handleRequestAnimationFrame.bind(this));
       }
       drop(){
-        this.drop_position = this.drop_position + 1 > this.max_rows + 40 ? 0 : this.drop_position + 1;
+        this.drop_position = this.drop_position + this.drop_speed > this.max_rows + 40 ? 0 : this.drop_position + this.drop_speed;
+        const closest = this.glyphs.reduce((a, b) => {
+          return Math.abs(b.glyph.position - this.drop_position) < Math.abs(a.glyph.position - this.drop_position) ? b : a;
+        });
         this.glyphs.forEach(glyph => {
-          if(glyph.glyph.position < this.drop_position){
+          if(glyph.glyph.position === closest.glyph.position && glyph.glyph.position < this.max_rows - 1){
+            glyph.node.style.color = `#ffffd1`;
+          } else if(glyph.glyph.position < this.drop_position){
             const alpha = 0.8 - ((this.drop_position - glyph.glyph.position) * 0.025)
             glyph.node.style.color = `rgba(182,255,161,${alpha})`;
           } else if(glyph.glyph.position > this.drop_position ){
             glyph.node.style.color = `rgba(0,0,0,0)`;
-          } else {
-            glyph.node.style.color = `#ffffd1`;
           }
         })
       }
