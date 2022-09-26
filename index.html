@@ -22,36 +22,17 @@
         this.drop_speed = options.drop_speed;
         this.drop_position = options.drop_position;
         this.color = null;
-        this.step_speed = 50;
       }
       drop(){
         this.drop_position = this.drop_position + 1 > this.max_rows + 40 ? 0 : this.drop_position + 1;
         if(this.position < this.drop_position){
           const alpha = 0.8 - ((this.drop_position - this.position) * 0.025)
           this.color = `rgba(182,255,161,${alpha})`;
-          this.step_speed = ((this.drop_position - this.position) * 100);
         } else if(this.position > this.drop_position ){
           this.color = `rgba(0,0,0,0)`;
-          this.step_speed = 1000;
         } else if(this.position === this.drop_position){
           this.color = '#ffffd1';
-          this.step_speed = 80;
         }
-      }
-      step(){
-        this.current = this.current + 1 > this.glyphs.length - 1 ? 0 : this.current + 1;
-        if(this.position === 1 && this.column === 1) return 'J'
-        if(this.position === 2 && this.column === 1) return 'O'
-        if(this.position === 3 && this.column === 1) return 'H'
-        if(this.position === 4 && this.column === 1) return 'N'
-        if(this.position === 5 && this.column === 1) return ' '
-        if(this.position === 6 && this.column === 1) return 'M'
-        if(this.position === 7 && this.column === 1) return 'I'
-        if(this.position === 8 && this.column === 1) return 'L'
-        if(this.position === 9 && this.column === 1) return 'L'
-        if(this.position === 10 && this.column === 1) return 'S'
-        if(this.position === 11 && this.column === 1) return ' '
-        return this.glyphs[this.current];
       }
       get(){
         return this.glyphs[this.current];
@@ -60,14 +41,11 @@
     class Matrix {
       constructor(){
         window.addEventListener('resize',this.init.bind(this));
-        this.timeouts = [];
         this.intervals = [];
         this.root = null;
       }
       async reset(){
-        await this.timeouts.every(timeout => { clearTimeout(timeout); return true; } )
         await this.intervals.every(interval => { clearInterval(interval); return true; } )
-        this.timeouts = [];
         this.intervals = [];
         this.root = document.getElementById('root');
         this.root.innerHTML = ``;
@@ -77,7 +55,6 @@
         const glyph_size = 12;
         const max_columns = Math.ceil(window.innerWidth / glyph_size);
         const max_rows = Math.ceil(window.innerHeight / glyph_size);
-        const glyphs = [];
         for(let c = 1; c < max_columns; c++){
           const column_el = this.createNode(this.root,'span');
           const drop_position = Math.floor(Math.random()*max_rows);
@@ -86,30 +63,15 @@
             const glyph = new Glyph({ column: c, max_rows: max_rows, position: r, drop_speed: drop_speed, drop_position: drop_position });
             const glyph_el = this.createNode(column_el,'span');
             glyph_el.innerHTML = glyph.get();
-            glyphs.push({ node: glyph_el, glyph: glyph });
-          }
-          if(c === max_columns - 1){
-            glyphs.forEach(glyph => {
-              // this.handleGlyphStep(glyph.node,glyph.glyph);
-              this.handleGlyphDrop(glyph.node,glyph.glyph);
-            })
+            glyph_el.style.color = "transparent";
+            const interval = setInterval(async () => {
+              await glyph.drop();
+              glyph_el.style.color = glyph.color;
+              glyph_el.style.textShadow = `0 0 3px ${glyph.color}`;
+            }, glyph.drop_speed );
+            this.intervals[`${glyph.column}${glyph.position}`] = interval;
           }
         }
-      }
-      handleGlyphStep(glyph_el,glyph){
-        glyph_el.innerHTML = glyph.step();
-        const timeout = setTimeout(() => {
-          this.handleGlyphStep(glyph_el,glyph);
-        }, glyph.step_speed );
-        this.timeouts[`${glyph.column}${glyph.position}`] = timeout;
-      }
-      handleGlyphDrop(glyph_el,glyph){
-        const interval = setInterval(async () => {
-          await glyph.drop();
-          glyph_el.style.color = glyph.color;
-          glyph_el.style.textShadow = `0 0 3px ${glyph.color}`;
-        }, glyph.drop_speed );
-        this.intervals[`${glyph.column}${glyph.position}`] = interval;
       }
       createNode(root,tag){
         const node = document.createElement(tag);
