@@ -3,124 +3,126 @@
   <head>
     <meta charset="utf-8">
     <title>Matrix</title>
-  </head>
-  <style media="screen">
-    @font-face { font-family: matrix; src: url(matrix.ttf); }
-    html,body { margin: 0; background: #000; overflow: hidden;}
-    #root { position: relative; overflow: hidden; font-family: matrix; display: flex; align-items: center; justify-content: center; flex-wrap: nowrap; }
-    #root > span { position: relative; }
-    #root > span > span { font-size: 11px; width: 12px; height: 12px; display: flex; align-items: center; justify-content: center; }
-  </style>
-  <script type="text/javascript">
-  class Glyph {
-    constructor(options){
-      this.glyphs = ['モ','エ','ヤ','キ','オ','カ','7','ケ','サ','ス','z','1','5','2','ヨ','タ','ワ','4','ネ','ヌ','ナ','9','8','ヒ','0','ホ','ア','3','ウ',' ','セ','¦',':','"','꞊','ミ','ラ','リ','╌','ツ','テ','ニ','ハ','ソ','▪','—','<','>','0','|','+','*','コ','シ','マ','ム','メ'];
-      this.current = Math.floor(Math.random()*this.glyphs.length);
-      this.column = options.column;
-      this.position = options.position;
-      this.max_rows = options.max_rows;
-      this.drop_speed = options.drop_speed;
-      this.drop_position = options.drop_position;
-      this.color = null;
-      this.step_speed = 50;
-    }
-    drop(){
-      this.drop_position = this.drop_position + 1 > this.max_rows + 40 ? 0 : this.drop_position + 1;
-      if(this.position < this.drop_position){
-        const alpha = 0.8 - ((this.drop_position - this.position) * 0.025)
-        this.color = `rgba(182,255,161,${alpha})`;
-        this.step_speed = ((this.drop_position - this.position) * 100);
-      } else if(this.position > this.drop_position ){
-        this.color = `rgba(0,0,0,0)`;
-        this.step_speed = 10000;
-      } else if(this.position === this.drop_position){
-        this.color = '#ffffd1';
-        this.step_speed = 80;
+    <link rel="preload" href="matrix.ttf" as="font" type="font/truetype" crossorigin>
+    <style media="screen">
+      @font-face { font-family: matrix; src: url(matrix.ttf); }
+      html,body { margin: 0; background: #000; overflow: hidden;}
+      #root { position: relative; overflow: hidden; font-family: matrix; display: flex; align-items: center; justify-content: center; flex-wrap: nowrap; }
+      #root > span { position: relative; }
+      #root > span > span { font-size: 11px; width: 12px; height: 12px; display: flex; align-items: center; justify-content: center; }
+    </style>
+    <script type="text/javascript">
+    class Glyph {
+      constructor(options){
+        this.glyphs = ['モ','エ','ヤ','キ','オ','カ','7','ケ','サ','ス','z','1','5','2','ヨ','タ','ワ','4','ネ','ヌ','ナ','9','8','ヒ','0','ホ','ア','3','ウ',' ','セ','¦',':','"','꞊','ミ','ラ','リ','╌','ツ','テ','ニ','ハ','ソ','▪','—','<','>','0','|','+','*','コ','シ','マ','ム','メ'];
+        this.current = Math.floor(Math.random()*this.glyphs.length);
+        this.column = options.column;
+        this.position = options.position;
+        this.max_rows = options.max_rows;
+        this.drop_speed = options.drop_speed;
+        this.drop_position = options.drop_position;
+        this.color = null;
+        this.step_speed = 50;
       }
-    }
-    step(){
-      this.current = this.current + 1 > this.glyphs.length - 1 ? 0 : this.current + 1;
-      if(this.position === 1 && this.column === 1) return 'J'
-      if(this.position === 2 && this.column === 1) return 'O'
-      if(this.position === 3 && this.column === 1) return 'H'
-      if(this.position === 4 && this.column === 1) return 'N'
-      if(this.position === 5 && this.column === 1) return ' '
-      if(this.position === 6 && this.column === 1) return 'M'
-      if(this.position === 7 && this.column === 1) return 'I'
-      if(this.position === 8 && this.column === 1) return 'L'
-      if(this.position === 9 && this.column === 1) return 'L'
-      if(this.position === 10 && this.column === 1) return 'S'
-      if(this.position === 11 && this.column === 1) return ' '
-      return this.glyphs[this.current];
-    }
-  }
-  class Matrix {
-    constructor(){
-      window.addEventListener('resize',this.init.bind(this));
-      this.timeouts = [];
-      this.intervals = [];
-      this.root = null;
-    }
-    async reset(){
-      await this.timeouts.every(timeout => { clearTimeout(timeout); return true; } )
-      await this.intervals.every(interval => { clearInterval(interval); return true; } )
-      this.timeouts = [];
-      this.intervals = [];
-      this.root = document.getElementById('root');
-      this.root.innerHTML = ``;
-    }
-    async init(){
-      await this.reset();
-      const glyph_size = 12;
-      const max_columns = Math.ceil(window.innerWidth / glyph_size);
-      const max_rows = Math.ceil(window.innerHeight / glyph_size);
-      const glyphs = [];
-      for(let c = 1; c < max_columns; c++){
-        const column_el = this.createNode(this.root,'span');
-        const drop_position = Math.floor(Math.random()*max_rows);
-        const drop_speed = Math.floor(Math.random() * (100 - 30) + 30);
-        for(let r = 1; r < max_rows; r++){
-          const glyph = new Glyph({ column: c, max_rows: max_rows, position: r, drop_speed: drop_speed, drop_position: drop_position });
-          const glyph_el = this.createNode(column_el,'span');
-          glyphs.push({ node: glyph_el, glyph: glyph });
-          // this.handleGlyphStep(glyph_el,glyph);
-          // this.handleGlyphDrop(glyph_el,glyph);
-        }
-        if(c === max_columns - 1){
-          glyphs.forEach(glyph => {
-            this.handleGlyphStep(glyph.node,glyph.glyph);
-            this.handleGlyphDrop(glyph.node,glyph.glyph);
-          })
+      drop(){
+        this.drop_position = this.drop_position + 1 > this.max_rows + 40 ? 0 : this.drop_position + 1;
+        if(this.position < this.drop_position){
+          const alpha = 0.8 - ((this.drop_position - this.position) * 0.025)
+          this.color = `rgba(182,255,161,${alpha})`;
+          this.step_speed = ((this.drop_position - this.position) * 100);
+        } else if(this.position > this.drop_position ){
+          this.color = `rgba(0,0,0,0)`;
+          this.step_speed = 10000;
+        } else if(this.position === this.drop_position){
+          this.color = '#ffffd1';
+          this.step_speed = 80;
         }
       }
+      step(){
+        this.current = this.current + 1 > this.glyphs.length - 1 ? 0 : this.current + 1;
+        if(this.position === 1 && this.column === 1) return 'J'
+        if(this.position === 2 && this.column === 1) return 'O'
+        if(this.position === 3 && this.column === 1) return 'H'
+        if(this.position === 4 && this.column === 1) return 'N'
+        if(this.position === 5 && this.column === 1) return ' '
+        if(this.position === 6 && this.column === 1) return 'M'
+        if(this.position === 7 && this.column === 1) return 'I'
+        if(this.position === 8 && this.column === 1) return 'L'
+        if(this.position === 9 && this.column === 1) return 'L'
+        if(this.position === 10 && this.column === 1) return 'S'
+        if(this.position === 11 && this.column === 1) return ' '
+        return this.glyphs[this.current];
+      }
     }
-    handleGlyphStep(glyph_el,glyph){
-      glyph_el.innerHTML = glyph.step();
-      const timeout = setTimeout(() => {
-        this.handleGlyphStep(glyph_el,glyph);
-      }, glyph.step_speed );
-      this.timeouts[`${glyph.column}${glyph.position}`] = timeout;
+    class Matrix {
+      constructor(){
+        window.addEventListener('resize',this.init.bind(this));
+        this.timeouts = [];
+        this.intervals = [];
+        this.root = null;
+      }
+      async reset(){
+        await this.timeouts.every(timeout => { clearTimeout(timeout); return true; } )
+        await this.intervals.every(interval => { clearInterval(interval); return true; } )
+        this.timeouts = [];
+        this.intervals = [];
+        this.root = document.getElementById('root');
+        this.root.innerHTML = ``;
+      }
+      async init(){
+        await this.reset();
+        const glyph_size = 12;
+        const max_columns = Math.ceil(window.innerWidth / glyph_size);
+        const max_rows = Math.ceil(window.innerHeight / glyph_size);
+        const glyphs = [];
+        for(let c = 1; c < max_columns; c++){
+          const column_el = this.createNode(this.root,'span');
+          const drop_position = Math.floor(Math.random()*max_rows);
+          const drop_speed = Math.floor(Math.random() * (100 - 30) + 30);
+          for(let r = 1; r < max_rows; r++){
+            const glyph = new Glyph({ column: c, max_rows: max_rows, position: r, drop_speed: drop_speed, drop_position: drop_position });
+            const glyph_el = this.createNode(column_el,'span');
+            glyphs.push({ node: glyph_el, glyph: glyph });
+            // this.handleGlyphStep(glyph_el,glyph);
+            // this.handleGlyphDrop(glyph_el,glyph);
+          }
+          if(c === max_columns - 1){
+            glyphs.forEach(glyph => {
+              this.handleGlyphStep(glyph.node,glyph.glyph);
+              this.handleGlyphDrop(glyph.node,glyph.glyph);
+            })
+          }
+        }
+      }
+      handleGlyphStep(glyph_el,glyph){
+        glyph_el.innerHTML = glyph.step();
+        const timeout = setTimeout(() => {
+          this.handleGlyphStep(glyph_el,glyph);
+        }, glyph.step_speed );
+        this.timeouts[`${glyph.column}${glyph.position}`] = timeout;
+      }
+      handleGlyphDrop(glyph_el,glyph){
+        const interval = setInterval(async () => {
+          await glyph.drop();
+          glyph_el.style.color = glyph.color;
+          glyph_el.style.textShadow = `0 0 3px ${glyph.color}`;
+        }, glyph.drop_speed );
+        this.intervals[`${glyph.column}${glyph.position}`] = interval;
+      }
+      createNode(root,tag){
+        const node = document.createElement(tag);
+        if(root) root.appendChild(node);
+        return node;
+      }
     }
-    handleGlyphDrop(glyph_el,glyph){
-      const interval = setInterval(async () => {
-        await glyph.drop();
-        glyph_el.style.color = glyph.color;
-        glyph_el.style.textShadow = `0 0 3px ${glyph.color}`;
-      }, glyph.drop_speed );
-      this.intervals[`${glyph.column}${glyph.position}`] = interval;
-    }
-    createNode(root,tag){
-      const node = document.createElement(tag);
-      if(root) root.appendChild(node);
-      return node;
-    }
-  }
-  document.addEventListener('DOMContentLoaded',() => {
-    const matrix = new Matrix();
-    matrix.init();
-  });
+    document.addEventListener('DOMContentLoaded',() => {
+      const matrix = new Matrix();
+      matrix.init();
+    });
 
-  </script>
+    </script>
+  </head>
+
   <body>
     <div id="root"></div>
   </body>
