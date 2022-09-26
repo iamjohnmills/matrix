@@ -8,6 +8,7 @@
       @font-face { font-family: matrix; src: url(matrix.ttf); }
       html,body { margin: 0; background: #000; overflow: hidden;}
       #root { color: rgb(182,255,161); position: relative; overflow: hidden; font-family: matrix; display: flex; align-items: center; justify-content: center; flex-wrap: nowrap; }
+      /* #root:after { content: ''; position: absolute; left: 0; top: 0; right: 0; bottom: 0; background: lawngreen; mix-blend-mode: hue} */
       #root > span { position: relative; }
       #root > span > span { color: transparent; font-size: 11px; width: 12px; height: 12px; display: flex; align-items: center; justify-content: center; }
     </style>
@@ -53,8 +54,11 @@
         this.drop_position = this.drop_position > this.overflow ? 0 : this.drop_position + 1;
         this.glyphs.forEach(glyph => {
           if(glyph.glyph.position < this.drop_position){
-            const alpha = 0.8 - ((this.drop_position - glyph.glyph.position) * 0.025)
-            glyph.node.style.color = `rgba(182,255,161,${alpha})`;
+            // const alpha = 0.8 - ((this.drop_position - glyph.glyph.position) * 0.025);
+            const r = 180 - ((this.drop_position - glyph.glyph.position) * 10);
+            const g = 255 - ((this.drop_position - glyph.glyph.position) * 10);
+            const b = 160 - ((this.drop_position - glyph.glyph.position) * 10);
+            glyph.node.style.color = `rgb(${r},${g},${b})`;
           } else if(glyph.glyph.position > this.drop_position ){
             glyph.node.style.color = `transparent`;
           } else {
