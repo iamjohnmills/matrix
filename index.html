@@ -57,7 +57,6 @@
   class Matrix {
     constructor(){
       window.addEventListener('resize',this.init.bind(this));
-      document.addEventListener('DOMContentLoaded',this.init.bind(this));
       this.timeouts = [];
       this.intervals = [];
       this.root = null;
@@ -108,7 +107,11 @@
       return node;
     }
   }
-  const matrix = new Matrix();
+  document.addEventListener('DOMContentLoaded',() => {
+    const matrix = new Matrix();
+    matrix.init();
+  });
+
   </script>
   <body>
     <div id="root"></div>
