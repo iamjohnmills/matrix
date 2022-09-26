@@ -12,32 +12,57 @@
       #root > span > span { font-size: 11px; width: 12px; height: 12px; display: flex; align-items: center; justify-content: center; }
     </style>
     <script type="text/javascript">
+
+    const createNode = (root,tag) => {
+      const node = document.createElement(tag);
+      if(root) root.appendChild(node);
+      return node;
+    }
+
     class Glyph {
       constructor(options){
         this.glyphs = ['モ','エ','ヤ','キ','オ','カ','7','ケ','サ','ス','z','1','5','2','ヨ','タ','ワ','4','ネ','ヌ','ナ','9','8','ヒ','0','ホ','ア','3','ウ',' ','セ','¦',':','"','꞊','ミ','ラ','リ','╌','ツ','テ','ニ','ハ','ソ','▪','—','<','>','0','|','+','*','コ','シ','マ','ム','メ'];
         this.current = Math.floor(Math.random()*this.glyphs.length);
-        this.column = options.column;
         this.position = options.position;
-        this.max_rows = options.max_rows;
-        this.drop_speed = options.drop_speed;
-        this.drop_position = options.drop_position;
-        this.color = null;
-      }
-      drop(){
-        this.drop_position = this.drop_position + 1 > this.max_rows + 40 ? 0 : this.drop_position + 1;
-        if(this.position < this.drop_position){
-          const alpha = 0.8 - ((this.drop_position - this.position) * 0.025)
-          this.color = `rgba(182,255,161,${alpha})`;
-        } else if(this.position > this.drop_position ){
-          this.color = `rgba(0,0,0,0)`;
-        } else if(this.position === this.drop_position){
-          this.color = '#ffffd1';
-        }
       }
       get(){
         return this.glyphs[this.current];
       }
     }
+
+    class Column {
+      constructor(options){
+        this.position = options.position;
+        this.max_rows = options.max_rows;
+        this.drop_position = Math.floor(Math.random()*this.max_rows);
+        this.drop_speed = Math.floor(Math.random() * (100 - 30) + 30);
+        this.glyphs = [];
+        for(let r = 1; r < this.max_rows; r++){
+          const glyph = new Glyph({ position: r });
+          const glyph_el = createNode(options.root,'span');
+          glyph_el.innerHTML = glyph.get();
+          glyph_el.style.color = 'transparent';
+          this.glyphs.push({ node: glyph_el, glyph: glyph });
+        }
+        this.interval = setInterval(async () => {
+          this.drop();
+        }, this.drop_speed )
+      }
+      drop(){
+        this.drop_position = this.drop_position + 1 > this.max_rows + 40 ? 0 : this.drop_position + 1;
+        this.glyphs.forEach(glyph => {
+          if(glyph.glyph.position < this.drop_position){
+            const alpha = 0.8 - ((this.drop_position - glyph.glyph.position) * 0.025)
+            glyph.node.style.color = `rgba(182,255,161,${alpha})`;
+          } else if(glyph.glyph.position > this.drop_position ){
+            glyph.node.style.color = `rgba(0,0,0,0)`;
+          } else {
+            glyph.node.style.color = `#ffffd1`;
+          }
+        })
+      }
+    }
+
     class Matrix {
       constructor(){
         document.addEventListener('DOMContentLoaded',this.init.bind(this));
@@ -57,27 +82,9 @@
         const max_columns = Math.ceil(window.innerWidth / glyph_size);
         const max_rows = Math.ceil(window.innerHeight / glyph_size);
         for(let c = 1; c < max_columns; c++){
-          const column_el = this.createNode(this.root,'span');
-          const drop_position = Math.floor(Math.random()*max_rows);
-          const drop_speed = Math.floor(Math.random() * (100 - 30) + 30);
-          for(let r = 1; r < max_rows; r++){
-            const glyph = new Glyph({ column: c, max_rows: max_rows, position: r, drop_speed: drop_speed, drop_position: drop_position });
-            const glyph_el = this.createNode(column_el,'span');
-            glyph_el.innerHTML = glyph.get();
-            glyph_el.style.color = "transparent";
-            const interval = setInterval(async () => {
-              await glyph.drop();
-              glyph_el.style.color = glyph.color;
-              glyph_el.style.textShadow = `0 0 3px ${glyph.color}`;
-            }, glyph.drop_speed );
-            this.intervals[`${glyph.column}${glyph.position}`] = interval;
-          }
+          const column_el = createNode(this.root,'span');
+          const column = new Column({ root: column_el, max_rows: max_rows, position: c })
         }
-      }
-      createNode(root,tag){
-        const node = document.createElement(tag);
-        if(root) root.appendChild(node);
-        return node;
       }
     }
 
