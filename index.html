@@ -19,8 +19,6 @@
       const node = document.createElement(options.tag);
       if(options.className) node.setAttribute('class',options.className);
       if(options.innerHTML) node.innerHTML = options.innerHTML;
-      if(options.attributes) Object.keys(options.attributes).forEach(key => node.setAttribute(key, options.attributes[key]));
-      if(options.style) Object.keys(options.style).forEach(key => node.style[key] = options.style[key]);
       if(options.cssText) node.style.cssText = options.cssText;
       options.root.appendChild(node);
       return node;
