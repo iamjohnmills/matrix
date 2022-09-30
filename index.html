@@ -14,9 +14,15 @@
     </style>
     <script type="text/javascript">
 
-    const createNode = (root,tag) => {
-      const node = document.createElement(tag);
-      if(root) root.appendChild(node);
+
+    const createNode = (options) => {
+      const node = document.createElement(options.tag);
+      if(options.className) node.setAttribute('class',options.className);
+      if(options.innerHTML) node.innerHTML = options.innerHTML;
+      if(options.attributes) Object.keys(options.attributes).forEach(key => node.setAttribute(key, options.attributes[key]));
+      if(options.style) Object.keys(options.style).forEach(key => node.style[key] = options.style[key]);
+      if(options.cssText) node.style.cssText = options.cssText;
+      options.root.appendChild(node);
       return node;
     }
 
@@ -33,6 +39,7 @@
 
     class Column {
       constructor(options){
+        window.addEventListener('resize',this.reset.bind(this));
         this.letter = options.letter;
         this.rows_center = options.rows_center;
         this.position = options.position;
@@ -41,16 +48,17 @@
         this.drop_position = Math.floor(Math.random()*this.max_rows);
         this.drop_speed = Math.floor(Math.random() * (100 - 30) + 30);
         this.glyphs = [];
-        for(let r = 1; r < this.max_rows; r++){
-          const glyph = new Glyph({ position: r });
-          const glyph_el = createNode(options.root,'span');
-          glyph_el.innerHTML = glyph.get();
-          glyph_el.style.color = 'transparent';
+        for(let i = 1; i < this.max_rows; i++){
+          const glyph = new Glyph({ position: i });
+          const glyph_el = createNode({ root: options.root, tag: 'span', innerHTML: glyph.get(), cssText: `color: transparent`});
           this.glyphs.push({ node: glyph_el, glyph: glyph });
         }
-        this.interval = setInterval(async () => {
+        this.interval = setInterval(() => {
           this.drop();
         }, this.drop_speed )
+      }
+      reset(){
+        clearInterval(this.interval);
       }
       drop(){
         this.drop_position = this.drop_position > this.overflow ? 0 : this.drop_position + 1;
@@ -58,17 +66,15 @@
           if(glyph.node.classList.contains('active')) return;
           if(glyph.glyph.position < this.drop_position){
             const alpha = 0.8 - ((this.drop_position - glyph.glyph.position) * 0.025)
-            glyph.node.style.color = `rgba(180,255,160,${alpha})`;
-            glyph.node.style.textShadow = `0 0 4px rgba(180,255,160,${alpha})`;
+            glyph.node.style.cssText = `color: rgba(180,255,160,${alpha}); text-shadow: 0 0 4px rgba(180,255,160,${alpha})`;
           } else if(glyph.glyph.position > this.drop_position ){
-            glyph.node.style.color = `transparent`;
+            glyph.node.style.cssText = `color: transparent`;
           } else {
             if(this.letter && glyph.glyph.position === this.rows_center){
               glyph.node.classList.add('active');
               glyph.node.innerHTML = this.letter;
             }
-            glyph.node.style.color = `#ffffd1`;
-            glyph.node.style.textShadow = `0 0 4px #ffffd1`;
+            glyph.node.style.cssText = `color: #ffffd1; text-shadow: 0 0 4px #ffffd1`;
           }
         })
       }
@@ -78,13 +84,10 @@
       constructor(){
         document.addEventListener('DOMContentLoaded',this.init.bind(this));
         window.addEventListener('resize',this.init.bind(this));
-        this.intervals = [];
         this.root = null;
         this.message = 'GITHUB.COM/IAMJOHNMILLS';
       }
       async reset(){
-        await this.intervals.every(interval => { clearInterval(interval); return true; } )
-        this.intervals = [];
         this.root = document.getElementById('root');
         this.root.innerHTML = ``;
       }
@@ -93,18 +96,15 @@
         const glyph_size = 12;
         const max_columns = Math.ceil(window.innerWidth / glyph_size);
         const max_rows = Math.ceil(window.innerHeight / glyph_size);
-
         const message_parts = this.message.split('');
-
         const rows_center = Math.floor(max_rows / 2);
         const columns_center = Math.floor(max_columns / 2);
         const message_start = columns_center - (Math.floor(message_parts.length / 2));
         const message_letters = message_parts.map( (message_part,i) => ({ position: message_start + i, letter: message_part }))
-
-        for(let c = 1; c < max_columns; c++){
-          const letter = message_letters.find(message_letter => message_letter.position === c);
-          const column_el = createNode(this.root,'span');
-          const column = new Column({ root: column_el, rows_center: rows_center, letter: letter ? letter.letter : null, max_rows: max_rows, position: c })
+        for(let i = 1; i < max_columns; i++){
+          const letter = message_letters.find(message_letter => message_letter.position === i);
+          const column_el = createNode({ root: this.root, tag: 'span' });
+          const column = new Column({ root: column_el, rows_center: rows_center, letter: letter ? letter.letter : null, max_rows: max_rows, position: i })
         }
       }
     }
