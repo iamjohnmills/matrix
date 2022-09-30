@@ -50,9 +50,7 @@
           const glyph_el = createNode({ root: options.root, tag: 'span', innerHTML: glyph.get(), cssText: `color: transparent`});
           this.glyphs.push({ node: glyph_el, glyph: glyph });
         }
-        this.interval = setInterval(() => {
-          this.drop();
-        }, this.drop_speed )
+        this.interval = setInterval(() => { this.drop() }, this.drop_speed )
       }
       reset(){
         clearInterval(this.interval);
