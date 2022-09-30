@@ -84,12 +84,9 @@
         this.root = null;
         this.message = 'GITHUB.COM/IAMJOHNMILLS';
       }
-      async reset(){
+      async init(){
         this.root = document.getElementById('root');
         this.root.innerHTML = ``;
-      }
-      async init(){
-        await this.reset();
         const glyph_size = 12;
         const max_columns = Math.ceil(window.innerWidth / glyph_size);
         const max_rows = Math.ceil(window.innerHeight / glyph_size);
