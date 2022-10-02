@@ -6,7 +6,9 @@
     <link rel="preload" href="matrix.ttf" as="font" type="font/ttf">
     <style media="screen">
       @font-face { font-family: matrix; src: url(matrix.ttf); }
-      html,body { margin: 0; background: #000; overflow: hidden;}
+      html,body { margin: 0; background: #000; overflow: hidden; height: 100%; }
+
+      /* #root, canvas { position: absolute; left: 0; top: 0; right: 0; bottom: 0; } */
       #root { color: rgb(182,255,161); position: relative; overflow: hidden; font-family: matrix, sans-serif; font-weight: bold; display: flex; align-items: center; justify-content: center; flex-wrap: nowrap; }
       #root > span { position: relative; }
       #root > span > span { color: transparent; font-size: 11px; width: 12px; height: 12px; display: flex; align-items: center; justify-content: center; }
@@ -17,6 +19,7 @@
     const createNode = (options) => {
       const node = document.createElement(options.tag);
       if(options.className) node.setAttribute('class',options.className);
+      if(options.attributes) Object.keys(options.attributes).forEach(key => node.setAttribute(key, options.attributes[key]));
       if(options.innerHTML) node.innerHTML = options.innerHTML;
       if(options.cssText) node.style.cssText = options.cssText;
       options.root.appendChild(node);
@@ -79,25 +82,62 @@
       constructor(){
         document.addEventListener('DOMContentLoaded',this.init.bind(this));
         window.addEventListener('resize',this.init.bind(this));
-        this.root = null;
+        this.glyphs = ['モ','エ','ヤ','キ','オ','カ','7','ケ','サ','ス','z','1','5','2','ヨ','タ','ワ','4','ネ','ヌ','ナ','9','8','ヒ','0','ホ','ア','3','ウ',' ','セ','¦',':','"','꞊','ミ','ラ','リ','╌','ツ','テ','ニ','ハ','ソ','▪','—','<','>','0','|','+','*','コ','シ','マ','ム','メ'];
         this.message = 'GITHUB.COM/IAMJOHNMILLS';
+        this.glyph_size = 12;
+        this.intervals = [];
       }
       async init(){
+        await this.intervals.every(interval => { clearInterval(interval); return true; } );
         this.root = document.getElementById('root');
         this.root.innerHTML = ``;
-        const glyph_size = 12;
-        const max_columns = Math.ceil(window.innerWidth / glyph_size);
-        const max_rows = Math.ceil(window.innerHeight / glyph_size);
+        this.max_columns = Math.ceil(window.innerWidth / this.glyph_size);
+        this.max_rows = Math.ceil(window.innerHeight / this.glyph_size);
+        this.rows_center = Math.floor(this.max_rows / 2);
+        this.columns_center = Math.floor(this.max_columns / 2);
+        this.overflow = this.max_rows + 40;
+        this.matrix = this.generate();
+      }
+      generate(){
         const message_parts = this.message.split('');
-        const rows_center = Math.floor(max_rows / 2);
-        const columns_center = Math.floor(max_columns / 2);
-        const message_start = columns_center - (Math.floor(message_parts.length / 2));
+        const message_start = this.columns_center - (Math.floor(message_parts.length / 2));
         const message_letters = message_parts.map( (message_part,i) => ({ position: message_start + i, letter: message_part }))
-        for(let i = 1; i < max_columns; i++){
-          const letter = message_letters.find(message_letter => message_letter.position === i);
+        Array.from(Array(this.max_columns)).forEach((column,i) => {
           const column_el = createNode({ root: this.root, tag: 'span' });
-          const column = new Column({ root: column_el, rows_center: rows_center, letter: letter ? letter.letter : null, max_rows: max_rows, position: i })
-        }
+          let drop_position = Math.floor(Math.random()*this.max_rows);
+          const drop_speed = Math.floor(Math.random() * (100 - 30) + 30);
+          Array.from(Array(this.max_rows)).forEach((row,z) => {
+            const letter = message_letters.find(message_letter => message_letter.position === i && z === this.rows_center);
+            let char = this.glyphs[Math.floor(Math.random()*this.glyphs.length)];
+            const glyph_el = createNode({ root: column_el, tag: 'span', innerHTML: char, cssText: `color: transparent`});
+            const char_interval = Math.random() * 3000;
+            this.intervals.push(setInterval(() => {
+              if(letter || drop_position - z !== 5) return;
+              glyph_el.innerHTML = this.glyphs[Math.floor(Math.random()*this.glyphs.length)];
+            }, char_interval ))
+            this.intervals.push(setInterval(() => {
+              if(glyph_el.classList.contains('active')) return;
+              if(z < drop_position){
+                const alpha = 0.8 - ((drop_position - z) * 0.025)
+                glyph_el.style.cssText = `color: rgba(180,255,160,${alpha}); text-shadow: 0 0 4px rgba(180,255,160,${alpha})`;
+              } else if(z > drop_position ){
+                glyph_el.style.cssText = `color: transparent`;
+              } else {
+                if(letter && z === this.rows_center) {
+                  glyph_el.innerHTML = letter.letter;
+                  glyph_el.classList.add('active');
+                }
+                glyph_el.style.cssText = `color: #ffffd1; text-shadow: 0 0 4px #ffffd1`;
+              }
+            }, drop_speed))
+          });
+          this.intervals.push(setInterval(() => { drop_position = drop_position > this.overflow ? 0 : drop_position + 1 }, drop_speed ))
+        });
+        // for(let i = 1; i < this.max_columns; i++){
+        //   const letter = message_letters.find(message_letter => message_letter.position === i);
+        //   const column_el = createNode({ root: this.root, tag: 'span' });
+        //   const column = new Column({ root: column_el, rows_center: this.rows_center, letter: letter ? letter.letter : null, max_rows: this.max_rows, position: i })
+        // }
       }
     }
 
