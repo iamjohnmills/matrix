@@ -102,42 +102,11 @@
         const message_parts = this.message.split('');
         const message_start = this.columns_center - (Math.floor(message_parts.length / 2));
         const message_letters = message_parts.map( (message_part,i) => ({ position: message_start + i, letter: message_part }))
-        Array.from(Array(this.max_columns)).forEach((column,i) => {
+        for(let i = 1; i < this.max_columns; i++){
+          const letter = message_letters.find(message_letter => message_letter.position === i);
           const column_el = createNode({ root: this.root, tag: 'span' });
-          let drop_position = Math.floor(Math.random()*this.max_rows);
-          const drop_speed = Math.floor(Math.random() * (100 - 30) + 30);
-          Array.from(Array(this.max_rows)).forEach((row,z) => {
-            const letter = message_letters.find(message_letter => message_letter.position === i && z === this.rows_center);
-            let char = this.glyphs[Math.floor(Math.random()*this.glyphs.length)];
-            const glyph_el = createNode({ root: column_el, tag: 'span', innerHTML: char, cssText: `color: transparent`});
-            const char_interval = Math.random() * 3000;
-            this.intervals.push(setInterval(() => {
-              if(letter || drop_position - z !== 5) return;
-              glyph_el.innerHTML = this.glyphs[Math.floor(Math.random()*this.glyphs.length)];
-            }, char_interval ))
-            this.intervals.push(setInterval(() => {
-              if(glyph_el.classList.contains('active')) return;
-              if(z < drop_position){
-                const alpha = 0.8 - ((drop_position - z) * 0.025)
-                glyph_el.style.cssText = `color: rgba(180,255,160,${alpha}); text-shadow: 0 0 4px rgba(180,255,160,${alpha})`;
-              } else if(z > drop_position ){
-                glyph_el.style.cssText = `color: transparent`;
-              } else {
-                if(letter && z === this.rows_center) {
-                  glyph_el.innerHTML = letter.letter;
-                  glyph_el.classList.add('active');
-                }
-                glyph_el.style.cssText = `color: #ffffd1; text-shadow: 0 0 4px #ffffd1`;
-              }
-            }, drop_speed))
-          });
-          this.intervals.push(setInterval(() => { drop_position = drop_position > this.overflow ? 0 : drop_position + 1 }, drop_speed ))
-        });
-        // for(let i = 1; i < this.max_columns; i++){
-        //   const letter = message_letters.find(message_letter => message_letter.position === i);
-        //   const column_el = createNode({ root: this.root, tag: 'span' });
-        //   const column = new Column({ root: column_el, rows_center: this.rows_center, letter: letter ? letter.letter : null, max_rows: this.max_rows, position: i })
-        // }
+          const column = new Column({ root: column_el, rows_center: this.rows_center, letter: letter ? letter.letter : null, max_rows: this.max_rows, position: i })
+        }
       }
     }
 
