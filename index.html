@@ -46,13 +46,18 @@
           column.drop_position = position > this.overflow ? 0 : position;
           let position_y = Math.floor(column.drop_position);
           column.glyphs.forEach((row,y) => {
-            if(row.active || y > position_y) return;
+            if(row.active || y > position_y || (y < position_y && row.node.style.visibility === 'hidden')) return;
             if(y < position_y){
-              const alpha = 0.8 - (position_y - y) * 0.025
-              const color = `rgba(180,255,160,${alpha.toFixed(2)})`;
-              const textShadow = `0 0 4px rgba(180,255,160,${alpha.toFixed(2)})`;
-              if(row.node.style.color !== color) row.node.style.color = color;
-              if(row.node.style.textShadow !== textShadow) row.node.style.textShadow = textShadow;
+              const alpha = 0.8 - (position_y - y) * 0.025;
+              const alpha_rounded = alpha.toFixed(2);
+              if(alpha_rounded > 0){
+                const color = `rgba(180,255,160,${alpha_rounded})`;
+                const textShadow = `0 0 4px rgba(180,255,160,${alpha_rounded})`;
+                if(row.node.style.color !== color) row.node.style.color = color;
+                if(row.node.style.textShadow !== textShadow) row.node.style.textShadow = textShadow;
+              } else {
+                row.node.style.visibility = `hidden`;
+              }
             } else {
               row.active = !!row.letter;
               if(row.active) row.node.innerHTML = row.letter.letter;
