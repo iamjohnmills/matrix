@@ -9,7 +9,7 @@
       * { box-sizing: border-box; }
       html,body { margin: 0; background: #000; overflow: hidden; height: 100%; }
       #root { color: rgb(182,255,161); position: relative; overflow: hidden; font-family: matrix, sans-serif; font-weight: bold; display: flex; align-items: center; justify-content: center; flex-wrap: nowrap; }
-      /* #root:after { content: ''; z-index: 1; position: absolute; top: 0; right: 0; bottom: 0; left: 0; background: rgba(255,255,255,0.3); backdrop-filter: blur(1px); mix-blend-mode: overlay;} */
+      #root:after { content: ''; z-index: 1; position: absolute; top: 0; right: 0; bottom: 0; left: 0; background: rgba(255,255,255,0.3); backdrop-filter: blur(1px); mix-blend-mode: overlay;}
       #root > span { position: relative; }
       #root > span > .glyph { position: relative; color: transparent; overflow: hidden; font-size: 11px; width: 12px; height: 12px; display: flex; align-items: center; justify-content: center; }
     </style>
@@ -32,7 +32,7 @@
         this.glyph_size = 12;
       }
       async init(){
-        if(this.interval) clearInterval(this.interval);
+        if(this.interval) cancelAnimationFrame(this.interval);
         this.root = document.getElementById('root');
         this.root.innerHTML = ``;
         this.max_columns = Math.ceil(window.innerWidth / this.glyph_size);
@@ -54,14 +54,11 @@
               const alpha = 0.8 - (position_y - y) * 0.025;
               const alpha_rounded = alpha.toFixed(2);
               if(alpha_rounded > 0){
-                const r = Math.floor(180 - (position_y - y) * 9);
-                const g = Math.floor(255 - (position_y - y) * 12);
-                const b = Math.floor(160 - (position_y - y) * 8);
-                const color = `rgba(${r},${g},${b})`;
+                const color = `rgba(180,255,160,${alpha_rounded})`;
                 // const textShadow = `0 0 4px rgba(180,255,160,${alpha_rounded})`;
-                // row.node.style.zIndex = 1;
+                row.node.style.zIndex = 1;
                 if(row.node.style.color !== color) row.node.style.color = color;
-                // row.node.style.textShadow = `unset`;
+                row.node.style.textShadow = `unset`;
               } else {
                 row.node.style.visibility = `hidden`;
               }
@@ -69,11 +66,11 @@
               row.active = !!row.letter;
               if(row.active) row.node.innerHTML = row.letter.letter;
               const color = `#ffffd1`;
-              // const textShadow = `0 0 4px #ffffd1`;
+              const textShadow = `0 0 4px #ffffd1`;
               row.node.style.visibility = `visible`;
-              // row.node.style.zIndex = 2;
+              row.node.style.zIndex = 2;
               if(row.node.style.color !== color) row.node.style.color = color;
-              // if(row.node.style.textShadow !== textShadow) row.node.style.textShadow = textShadow;
+              if(row.node.style.textShadow !== textShadow) row.node.style.textShadow = textShadow;
             }
           })
         })
