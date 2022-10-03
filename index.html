@@ -40,7 +40,8 @@
         this.columns_center = Math.floor(this.max_columns / 2);
         this.overflow = this.max_rows + 40;
         this.matrix = this.generate();
-        this.interval = setInterval(() => { this.render() },30)
+        // this.interval = setInterval(() => { this.render() },30)
+        this.interval = window.requestAnimationFrame(this.render.bind(this));
       }
       render(){
         this.matrix.forEach((column,x) => {
@@ -67,6 +68,7 @@
             }
           })
         })
+        this.interval = window.requestAnimationFrame(this.render.bind(this));
       }
       generate(){
         const message_parts = this.message.split('');
