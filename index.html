@@ -55,7 +55,6 @@
               const alpha_rounded = alpha.toFixed(2);
               if(alpha_rounded > 0){
                 const color = `rgba(180,255,160,${alpha_rounded})`;
-                // const textShadow = `0 0 4px rgba(180,255,160,${alpha_rounded})`;
                 row.node.style.zIndex = 1;
                 if(row.node.style.color !== color) row.node.style.color = color;
                 row.node.style.textShadow = `unset`;
