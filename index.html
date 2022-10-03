@@ -40,7 +40,6 @@
         this.columns_center = Math.floor(this.max_columns / 2);
         this.overflow = this.max_rows + 40;
         this.matrix = this.generate();
-        // this.interval = setInterval(() => { this.render() },30)
         this.interval = window.requestAnimationFrame(this.render.bind(this));
       }
       render(){
@@ -78,7 +77,7 @@
           const column_el = createNode({ root: this.root, tag: 'span' });
           return {
             drop_position: Math.floor(Math.random()*this.max_rows),
-            drop_speed: Math.random() * (1 - 0.3) + 0.3,
+            drop_speed: Math.random() * (0.5 - 0.1) + 0.1,
             glyphs: Array.from(Array(this.max_rows)).map((row,y) => ({
               node: createNode({ root: column_el, tag: 'span', className: 'glyph', innerHTML: this.glyphs[Math.floor(Math.random()*this.glyphs.length)]}),
               active: false,
