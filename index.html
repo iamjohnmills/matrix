@@ -25,8 +25,8 @@
 
     class Matrix {
       constructor(){
-        document.addEventListener('DOMContentLoaded',this.init.bind(this));
         window.addEventListener('resize',this.init.bind(this));
+        document.addEventListener('DOMContentLoaded',this.init.bind(this));
         this.glyphs = ['モ','エ','ヤ','キ','オ','カ','7','ケ','サ','ス','z','1','5','2','ヨ','タ','ワ','4','ネ','ヌ','ナ','9','8','ヒ','0','ホ','ア','3','ウ',' ','セ','¦',':','"','꞊','ミ','ラ','リ','╌','ツ','テ','ニ','ハ','ソ','▪','—','<','>','0','|','+','*','コ','シ','マ','ム','メ'];
         this.message = 'GITHUB.COM/IAMJOHNMILLS';
         this.glyph_size = 12;
@@ -49,27 +49,22 @@
           column.drop_position = position > this.overflow ? 0 : position;
           let position_y = Math.floor(column.drop_position);
           column.glyphs.forEach((row,y) => {
-            if(row.active || y > position_y || (y < position_y && row.node.style.visibility === 'hidden')) return;
+            if(row.active) return;
             if(y < position_y){
-              const alpha = 0.8 - (position_y - y) * 0.025;
-              const alpha_rounded = alpha.toFixed(2);
-              if(alpha_rounded > 0){
-                const color = `rgba(180,255,160,${alpha_rounded})`;
-                row.node.style.zIndex = 1;
-                if(row.node.style.color !== color) row.node.style.color = color;
-                row.node.style.textShadow = `unset`;
-              } else {
-                row.node.style.visibility = `hidden`;
-              }
+              let alpha = 0.8 - (position_y - y) * 0.025;
+              const color = `rgba(180,255,160,${alpha.toFixed(2)})`;
+              if(row.node.style.zIndex !== 1) row.node.style.zIndex = 1;
+              if(row.node.style.color !== color) row.node.style.color = color;
+              if(row.node.style.textShadow !== 'unset') row.node.style.textShadow = `unset`;
+            } else if( y > position_y){
+              if(row.node.style.visibility !== 'hidden') row.node.style.visibility = `hidden`;
             } else {
               row.active = !!row.letter;
               if(row.active) row.node.innerHTML = row.letter.letter;
-              const color = `#ffffd1`;
-              const textShadow = `0 0 4px #ffffd1`;
               row.node.style.visibility = `visible`;
               row.node.style.zIndex = 2;
-              if(row.node.style.color !== color) row.node.style.color = color;
-              if(row.node.style.textShadow !== textShadow) row.node.style.textShadow = textShadow;
+              row.node.style.color = `#ffffd1`;
+              row.node.style.textShadow = `0 0 4px #ffffd1`;
             }
           })
         })
