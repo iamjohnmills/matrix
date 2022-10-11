@@ -45,18 +45,25 @@
       }
       render(){
         this.matrix.forEach((column,x) => {
-          let position = column.drop_position + (1 * column.drop_speed);
-          column.drop_position = position > this.overflow ? 0 : position;
-          let position_y = Math.floor(column.drop_position);
+          let drop_position_v = column.drop_position_v + (1 * column.drop_speed);
+          column.drop_position_v = drop_position_v > this.overflow ? 0 : drop_position_v;
+          let drop_position = Math.floor(column.drop_position_v);
+          if(drop_position === column.drop_position) return;
+          column.drop_position = drop_position;
           column.glyphs.forEach((row,y) => {
             if(row.active) return;
-            if(y < position_y){
-              let alpha = 0.8 - (position_y - y) * 0.025;
+            if(y < drop_position){
+              let alpha = 0.8 - (drop_position - y) * 0.025;
               const color = `rgba(180,255,160,${alpha.toFixed(2)})`;
+              if(drop_position % 15 === 0 && y % column.swap_position === 0 && row.node.innerHTML !== row.swap_glyph){
+                const glyph = row.node.innerHTML;
+                row.node.innerHTML = row.swap_glyph;
+                row.swap_glyph = glyph;
+              }
               if(row.node.style.zIndex !== 1) row.node.style.zIndex = 1;
               if(row.node.style.color !== color) row.node.style.color = color;
               if(row.node.style.textShadow !== 'unset') row.node.style.textShadow = `unset`;
-            } else if( y > position_y){
+            } else if( y > drop_position){
               if(row.node.style.visibility !== 'hidden') row.node.style.visibility = `hidden`;
             } else {
               row.active = !!row.letter;
@@ -76,11 +83,15 @@
         const message_letters = message_parts.map( (message_part,i) => ({ position: message_start + i, letter: message_part }))
         return Array.from(Array(this.max_columns)).map((column,x) => {
           const column_el = createNode({ root: this.root, tag: 'span' });
+          const drop_position = Math.floor(Math.random()*this.max_rows);
           return {
-            drop_position: Math.floor(Math.random()*this.max_rows),
+            drop_position_v: drop_position,
+            drop_position: drop_position,
+            swap_position: Math.floor(Math.random() * (20 - 5) + 5),
             drop_speed: Math.random() * (0.5 - 0.1) + 0.1,
             glyphs: Array.from(Array(this.max_rows)).map((row,y) => ({
               node: createNode({ root: column_el, tag: 'span', className: 'glyph', innerHTML: this.glyphs[Math.floor(Math.random()*this.glyphs.length)]}),
+              swap_glyph: this.glyphs[Math.floor(Math.random()*this.glyphs.length)],
               active: false,
               letter: message_letters.find(message_letter => message_letter.position === x && this.rows_center === y),
             }) )
