@@ -71,30 +71,6 @@
             }
           }
         }
-        // this.matrix.forEach((column,x) => {
-        //   let position = column.drop_position + (1 * column.drop_speed);
-        //   column.drop_position = position > this.overflow ? 0 : position;
-        //   let position_y = Math.floor(column.drop_position);
-        //   column.glyphs.forEach((row,y) => {
-        //     if(row.active) return;
-        //     if(y < position_y){
-        //       let alpha = 0.8 - (position_y - y) * 0.025;
-        //       const color = `rgba(180,255,160,${alpha.toFixed(2)})`;
-        //       if(row.node.style.zIndex !== 1) row.node.style.zIndex = 1;
-        //       if(row.node.style.color !== color) row.node.style.color = color;
-        //       if(row.node.style.textShadow !== 'unset') row.node.style.textShadow = `unset`;
-        //     } else if( y > position_y){
-        //       if(row.node.style.visibility !== 'hidden') row.node.style.visibility = `hidden`;
-        //     } else {
-        //       row.active = !!row.letter;
-        //       if(row.active) row.node.innerHTML = row.letter.letter;
-        //       row.node.style.visibility = `visible`;
-        //       row.node.style.zIndex = 2;
-        //       row.node.style.color = `#ffffd1`;
-        //       row.node.style.textShadow = `0 0 4px #ffffd1`;
-        //     }
-        //   })
-        // })
       }
       generate(){
         const message_parts = this.message.split('');
