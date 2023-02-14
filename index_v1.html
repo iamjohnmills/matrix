@@ -9,16 +9,18 @@
       @font-face { font-family: matrix; src: url(matrix.ttf); }
       * { box-sizing: border-box; }
       html,body { margin: 0; background: #000; overflow: hidden; height: 100%; }
-      </style>
+      #root { color: rgb(182,255,161); position: relative; overflow: hidden; font-family: matrix, sans-serif; font-weight: bold; display: flex; align-items: center; justify-content: center; flex-wrap: nowrap; }
+      #root:after { content: ''; z-index: 1; position: absolute; top: 0; right: 0; bottom: 0; left: 0; background: rgba(255,255,255,0.3); backdrop-filter: blur(1px); mix-blend-mode: overlay;}
+      #root > span { position: relative; }
+      #root > span > .glyph { position: relative; color: transparent; overflow: hidden; font-size: 11px; width: 12px; height: 12px; display: flex; align-items: center; justify-content: center; }
+    </style>
     <script type="text/javascript">
 
     const createNode = (options) => {
       const node = document.createElement(options.tag);
       if(options.className) node.setAttribute('class',options.className);
       if(options.innerHTML) node.innerHTML = options.innerHTML;
-      if(options.attributes) Object.keys(options.attributes).forEach(key => node.setAttribute(key,options.attributes[key]) );
-      if(options.style) Object.keys(options.style).forEach(key => node.style[key] = options.style[key]);
-      if(options.root) options.root.appendChild(node);
+      options.root.appendChild(node);
       return node;
     }
 
@@ -29,7 +31,6 @@
         this.glyphs = ['モ','エ','ヤ','キ','オ','カ','7','ケ','サ','ス','z','1','5','2','ヨ','タ','ワ','4','ネ','ヌ','ナ','9','8','ヒ','0','ホ','ア','3','ウ',' ','セ','¦',':','"','꞊','ミ','ラ','リ','╌','ツ','テ','ニ','ハ','ソ','▪','—','<','>','0','|','+','*','コ','シ','マ','ム','メ'];
         this.message = 'GITHUB.COM/IAMJOHNMILLS';
         this.glyph_size = 12;
-        this.els = [];
       }
       async init(){
         if(this.interval) cancelAnimationFrame(this.interval);
@@ -40,78 +41,50 @@
         this.rows_center = Math.floor(this.max_rows / 2);
         this.columns_center = Math.floor(this.max_columns / 2);
         this.overflow = this.max_rows + 40;
-        this.width = window.innerWidth;
-        this.height = window.innerHeight;
-        this.els.canvas = createNode({ root: this.root, tag: 'canvas', attributes: { width: window.innerWidth, height: window.innerHeight } });
-        this.els.canvas_offscreen = createNode({ tag: 'canvas', attributes: { width: window.innerWidth, height: window.innerHeight } });
-        this.context = this.els.canvas.getContext('2d');
-        this.context_offscreen = this.els.canvas_offscreen.getContext('2d');
         this.matrix = this.generate();
         this.interval = window.requestAnimationFrame(this.render.bind(this));
       }
       render(){
-        this.context.clearRect(0, 0, this.width, this.height);
-        this.context_offscreen.clearRect(0, 0, this.width, this.height);
         for(const [x, column] of this.matrix.entries()){
           let position = column.drop_position + (1 * column.drop_speed);
           column.drop_position = position > this.overflow ? 0 : position;
           let position_y = Math.floor(column.drop_position);
           for(const [y, row] of column.glyphs.entries()){
-            const render_x = x * this.glyph_size;
-            const render_y = y * this.glyph_size;
-            if(row.active){
-              this.context_offscreen.font = '11px arial';
-              this.context_offscreen.fillStyle = '#ffffd1';
-              this.context_offscreen.fillText(row.letter.letter, render_x, render_y);
-            } else if(y < position_y){
+            if(row.active) continue;
+            if(y < position_y){
               let alpha = 0.8 - (position_y - y) * 0.025;
-              this.context_offscreen.font = '11px matrix';
-              this.context_offscreen.fillStyle = `rgba(180,255,160,${alpha.toFixed(2)})`;
-
-              // const glyph_width = 12;
-              // this.context_offscreen.textBaseline = "top"
-              // this.context_offscreen.shadowColor = `rgba(180,255,160,${alpha.toFixed(2)})`;
-              // this.context_offscreen.shadowOffsetX = glyph_width;
-              // this.context_offscreen.shadowOffsetY = 0;
-              // this.context_offscreen.shadowBlur = 4;
-
-              this.context_offscreen.fillText(row.glyph, render_x, render_y);
-              
+              const color = `rgba(180,255,160,${alpha.toFixed(2)})`;
+              if(row.node.style.zIndex !== 1) row.node.style.zIndex = 1;
+              if(row.node.style.color !== color) row.node.style.color = color;
+              if(row.node.style.textShadow !== 'unset') row.node.style.textShadow = `unset`;
             } else if( y > position_y){
-              this.context_offscreen.font = '11px matrix';
-              this.context_offscreen.fillStyle = '#000';
-              this.context_offscreen.fillText(row.glyph, render_x, render_y);
+              if(row.node.style.visibility !== 'hidden') row.node.style.visibility = `hidden`;
             } else {
               row.active = !!row.letter;
-              if(row.active){
-                this.context_offscreen.font = '11px arial';
-                this.context_offscreen.fillStyle = '#ffffd1';
-                this.context_offscreen.fillText(row.letter.letter, render_x, render_y);
-              } else {
-                this.context_offscreen.font = '11px matrix';
-                this.context_offscreen.fillStyle = '#ffffd1';
-                this.context_offscreen.fillText(row.glyph, render_x, render_y);
-              }
+              if(row.active) row.node.innerHTML = row.letter.letter;
+              row.node.style.visibility = `visible`;
+              row.node.style.zIndex = 2;
+              row.node.style.color = `#ffffd1`;
+              row.node.style.textShadow = `0 0 4px #ffffd1`;
             }
             if(x === this.matrix.length - 1 && y === column.glyphs.length - 1) {
               this.interval = window.requestAnimationFrame(this.render.bind(this));
             }
           }
         }
-        this.context.drawImage(this.els.canvas_offscreen, 0, 0);
       }
       generate(){
         const message_parts = this.message.split('');
         const message_start = this.columns_center - (Math.floor(message_parts.length / 2));
         const message_letters = message_parts.map( (message_part,i) => ({ position: message_start + i, letter: message_part }))
         return Array.from(Array(this.max_columns)).map((column,x) => {
-          // const column_el = createNode({ root: this.root, tag: 'span' });
+          const column_el = createNode({ root: this.root, tag: 'span' });
           return {
             drop_position: Math.floor(Math.random()*this.max_rows),
             drop_speed: Math.random() * (0.5 - 0.1) + 0.1,
             glyphs: Array.from(Array(this.max_rows)).map((row,y) => ({
+              node: createNode({ root: column_el, tag: 'span', className: 'glyph', innerHTML: this.glyphs[Math.floor(Math.random()*this.glyphs.length)]}),
               active: false,
-              glyph: this.glyphs[Math.floor(Math.random()*this.glyphs.length)],
               letter: message_letters.find(message_letter => message_letter.position === x && this.rows_center === y),
             }) )
           }
