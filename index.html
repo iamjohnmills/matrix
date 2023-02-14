@@ -35,8 +35,8 @@
       }
       async init(){
         if(this.interval) cancelAnimationFrame(this.interval);
-        this.width = 800; // window.innerWidth
-        this.height = 600; // window.innerHeight
+        this.width = window.innerWidth;
+        this.height = window.innerHeight;
         this.root = document.getElementById('root');
         this.root.innerHTML = ``;
         this.max_columns = Math.ceil(this.width / this.glyph_size);
@@ -54,11 +54,13 @@
       render(){
         this.context.clearRect(0, 0, this.width, this.height);
         this.context_offscreen.clearRect(0, 0, this.width, this.height);
-        for(const [x, column] of this.matrix.entries()){
+        for(let x = 0; x < this.matrix.length; x++){
+          const column = this.matrix[x];
           let position = column.drop_position + (1 * column.drop_speed);
           column.drop_position = position > this.overflow ? 0 : position;
           let position_y = Math.floor(column.drop_position);
-          for(const [y, row] of column.glyphs.entries()){
+          for(let y = 0; y < column.glyphs.length; y++){
+            const row = column.glyphs[y];
             let render_x = x * this.glyph_size;
             let render_y = y * this.glyph_size;
             if(row.active){
