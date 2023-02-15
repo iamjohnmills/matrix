@@ -75,16 +75,18 @@
           let position_y = Math.floor(column.drop_position);
           for(let y = 0; y < column.glyphs.length; y++){
             const row = column.glyphs[y];
-            // this.context_offscreen.shadowColor = "#ffffd1";
-            // this.context_offscreen.shadowOffsetX = 0;
-            // this.context_offscreen.shadowOffsetY = 0;
-            // this.context_offscreen.shadowBlur = 4;
             let render_x = x * this.glyph_size;
             let render_y = y * this.glyph_size;
+            this.context_offscreen.shadowBlur = 0;
             if(row.active){
               row.active = !!row.letter;
               this.context_offscreen.font = 'bold 11px sans-serif';
               this.context_offscreen.fillStyle = '#ffffd1';
+              this.context_offscreen.shadowColor = "#ffffd1";
+              this.context_offscreen.shadowOffsetX = 0;
+              this.context_offscreen.shadowOffsetY = 0;
+              this.context_offscreen.shadowBlur = 4;
+
               const letter_width = this.context_offscreen.measureText(row.letter.letter).width;
               render_x = ((this.glyph_size - letter_width) / 2) + render_x;
               this.context_offscreen.fillText(row.letter.letter, render_x, render_y);
