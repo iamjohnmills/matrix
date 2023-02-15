@@ -75,10 +75,10 @@
           let position_y = Math.floor(column.drop_position);
           for(let y = 0; y < column.glyphs.length; y++){
             const row = column.glyphs[y];
-            this.context_offscreen.shadowColor = "#ffffd1";
-            this.context_offscreen.shadowOffsetX = 0;
-            this.context_offscreen.shadowOffsetY = 0;
-            this.context_offscreen.shadowBlur = 4;
+            // this.context_offscreen.shadowColor = "#ffffd1";
+            // this.context_offscreen.shadowOffsetX = 0;
+            // this.context_offscreen.shadowOffsetY = 0;
+            // this.context_offscreen.shadowBlur = 4;
             let render_x = x * this.glyph_size;
             let render_y = y * this.glyph_size;
             if(row.active){
@@ -92,8 +92,8 @@
               let alpha = 0.8 - (position_y - y) * 0.025;
               this.context_offscreen.font = '11px matrix';
               this.context_offscreen.fillStyle = `rgba(180,255,160,${alpha.toFixed(2)})`;
-              this.context_offscreen.shadowColor = "rgba(180,255,160,${alpha.toFixed(2)})";
-              this.context_offscreen.shadowBlur = 20;
+              // this.context_offscreen.shadowColor = "rgba(180,255,160,${alpha.toFixed(2)})";
+              // this.context_offscreen.shadowBlur = 20;
               this.context_offscreen.fillText(row.glyph, render_x, render_y);
             } else if(y > position_y){
               // this.context_offscreen.font = '11px matrix';
