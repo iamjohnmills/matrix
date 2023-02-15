@@ -57,8 +57,8 @@
         this.context = this.els.canvas.getContext('2d');
         this.context_offscreen = this.els.canvas_offscreen.getContext('2d');
         this.matrix = this.generate();
-        // this.interval = window.requestAnimationFrame(this.render.bind(this));
-        this.interval = setInterval(this.render.bind(this),10);
+        this.interval = window.requestAnimationFrame(this.render.bind(this));
+        // this.interval = setInterval(this.render.bind(this),10);
         this.interval_fps = setInterval(this.handleFpsInterval.bind(this),1000);
       }
       handleFpsInterval(){
@@ -108,7 +108,7 @@
             if(x === this.matrix.length - 1 && y === column.glyphs.length - 1) {
               this.fps++;
               this.context.drawImage(this.els.canvas_offscreen, 0, 0);
-              // this.interval = window.requestAnimationFrame(this.render.bind(this));
+              this.interval = window.requestAnimationFrame(this.render.bind(this));
             }
           }
         }
