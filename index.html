@@ -33,11 +33,13 @@
         this.glyphs = ['モ','エ','ヤ','キ','オ','カ','7','ケ','サ','ス','z','1','5','2','ヨ','タ','ワ','4','ネ','ヌ','ナ','9','8','ヒ','0','ホ','ア','3','ウ',' ','セ','¦',':','"','꞊','ミ','ラ','リ','╌','ツ','テ','ニ','ハ','ソ','▪','—','<','>','0','|','+','*','コ','シ','マ','ム','メ'];
         this.message = 'GITHUB.COM/IAMJOHNMILLS';
         this.glyph_size = 12;
+        this.trail_length = 25;
+        this.alpha_step = (1 / this.trail_length) * 100;
         this.fps = 0;
         this.els = [];
       }
       handleKeydown(event){
-        this.els.fps.style.display = `block`;
+        this.els.fps.style.display = this.els.fps.style.display === `block` ? `none` : `block`;
       }
       async init(){
         // if(this.interval) cancelAnimationFrame(this.interval);
@@ -60,14 +62,15 @@
         this.matrix = this.generate();
         // this.interval = window.requestAnimationFrame(this.render.bind(this));
         // this.interval = setInterval(this.render.bind(this),10);
-        this.frame_timeout = setTimeout(this.render.bind(this),10);
+        this.render();
+        // this.frame_timeout = setTimeout(this.render.bind(this),8);
         this.interval_fps = setInterval(this.handleFpsInterval.bind(this),1000);
       }
       handleFpsInterval(){
         this.els.fps.innerHTML = `${this.fps} Frames / Second`;
         this.fps = 0;
       }
-      render(){
+      async render(){
         this.context.clearRect(0, 0, this.width, this.height);
         this.context_offscreen.clearRect(0, 0, this.width, this.height);
         for(let x = 0; x < this.matrix.length; x++){
@@ -84,26 +87,18 @@
               row.active = !!row.letter;
               this.context_offscreen.font = 'bold 11px sans-serif';
               this.context_offscreen.fillStyle = '#ffffd1';
-              this.context_offscreen.shadowColor = "#ffffd1";
-              this.context_offscreen.shadowOffsetX = 0;
-              this.context_offscreen.shadowOffsetY = 0;
-              this.context_offscreen.shadowBlur = 4;
               const letter_width = this.context_offscreen.measureText(row.letter.letter).width;
               render_x = ((this.glyph_size - letter_width) / 2) + render_x;
               this.context_offscreen.fillText(row.letter.letter, render_x, render_y);
             } else if(y < position_y){
-              this.context_offscreen.font = '11px matrix';
-              let alpha_a = (position_y - y).toFixed(2);
-              let alpha = 0.8 - alpha_a * 0.03;
-              this.context_offscreen.fillStyle = `rgba(180,255,160,${alpha})`;
-              // this.context_offscreen.shadowColor = "rgba(180,255,160,${alpha.toFixed(2)})";
-              // this.context_offscreen.shadowBlur = 20;
-              this.context_offscreen.fillText(row.glyph, render_x, render_y);
-            } else if(y > position_y){
-              // this.context_offscreen.font = '11px matrix';
-              // this.context_offscreen.fillStyle = '#000';
-              // this.context_offscreen.fillText(row.glyph, render_x, render_y);
-            } else {
+              const position_spread = position_y - y;
+              if(position_spread <= this.trail_length && position_spread > 0){
+                let alpha = (100 - position_spread * this.alpha_step) / 100;
+                this.context_offscreen.font = '11px matrix';
+                this.context_offscreen.fillStyle = `rgba(180,255,160,${alpha})`;
+                this.context_offscreen.fillText(row.glyph, render_x, render_y);
+              }
+            } else if(y === position_y){
               row.active = !!row.letter;
               this.context_offscreen.font = '11px matrix';
               this.context_offscreen.fillStyle = '#ffffd1';
@@ -111,7 +106,7 @@
             }
             if(x === this.matrix.length - 1 && y === column.glyphs.length - 1) {
               this.fps++;
-              this.context.drawImage(this.els.canvas_offscreen, 0, 0);
+              await this.context.drawImage(this.els.canvas_offscreen, 0, 0);
               this.frame_timeout = setTimeout(this.render.bind(this),8);
               // this.interval = window.requestAnimationFrame(this.render.bind(this));
             }
