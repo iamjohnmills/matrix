@@ -56,9 +56,10 @@
         this.overflow = this.max_rows + 40;
         this.els.fps = createNode({ root: this.root, tag: 'div', className: `fps`, style: { display: `none` } });
         this.els.canvas = createNode({ root: this.root, tag: 'canvas', attributes: { width: this.width, height: this.height } });
-        this.els.canvas_offscreen = createNode({ tag: 'canvas', attributes: { width: this.width, height: this.height } });
+        // this.els.canvas_offscreen = createNode({ tag: 'canvas', attributes: { width: this.width, height: this.height } });
+        this.canvas_offscreen = new OffscreenCanvas(this.width, this.height);
+        this.context_offscreen = this.canvas_offscreen.getContext('2d');
         this.context = this.els.canvas.getContext('2d');
-        this.context_offscreen = this.els.canvas_offscreen.getContext('2d');
         this.matrix = this.generate();
         // this.interval = window.requestAnimationFrame(this.render.bind(this));
         // this.interval = setInterval(this.render.bind(this),10);
@@ -106,7 +107,7 @@
             }
             if(x === this.matrix.length - 1 && y === column.glyphs.length - 1) {
               this.fps++;
-              await this.context.drawImage(this.els.canvas_offscreen, 0, 0);
+              await this.context.drawImage(this.canvas_offscreen, 0, 0);
               this.frame_timeout = setTimeout(this.render.bind(this),8);
               // this.interval = window.requestAnimationFrame(this.render.bind(this));
             }
