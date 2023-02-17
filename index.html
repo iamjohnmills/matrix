@@ -29,22 +29,17 @@
       constructor(){
         window.addEventListener('resize',this.init.bind(this));
         document.addEventListener('DOMContentLoaded',this.init.bind(this));
-        document.addEventListener('keydown',this.handleKeydown.bind(this));
         this.glyphs = ['モ','エ','ヤ','キ','オ','カ','7','ケ','サ','ス','z','1','5','2','ヨ','タ','ワ','4','ネ','ヌ','ナ','9','8','ヒ','0','ホ','ア','3','ウ',' ','セ','¦',':','"','꞊','ミ','ラ','リ','╌','ツ','テ','ニ','ハ','ソ','▪','—','<','>','0','|','+','*','コ','シ','マ','ム','メ'];
         this.message = 'GITHUB.COM/IAMJOHNMILLS';
         this.glyph_size = 12;
         this.trail_length = 25;
         this.alpha_step = (1 / this.trail_length) * 100;
-        this.fps = 0;
+        // this.fps = 0;
         this.els = [];
       }
-      handleKeydown(event){
-        this.els.fps.style.display = this.els.fps.style.display === `block` ? `none` : `block`;
-      }
       async init(){
-        // if(this.interval) cancelAnimationFrame(this.interval);
-        if(this.interval_fps) clearInterval(this.interval_fps);
-        if(this.frame_timeout) clearTimeout(this.frame_timeout);
+        if(this.interval) cancelAnimationFrame(this.interval);
+        // if(this.interval_fps) clearInterval(this.interval_fps);
         this.width = window.innerWidth;
         this.height = window.innerHeight;
         this.root = document.getElementById('root');
@@ -56,21 +51,17 @@
         this.overflow = this.max_rows + 40;
         this.els.fps = createNode({ root: this.root, tag: 'div', className: `fps`, style: { display: `none` } });
         this.els.canvas = createNode({ root: this.root, tag: 'canvas', attributes: { width: this.width, height: this.height } });
-        // this.els.canvas_offscreen = createNode({ tag: 'canvas', attributes: { width: this.width, height: this.height } });
         this.canvas_offscreen = new OffscreenCanvas(this.width, this.height);
         this.context_offscreen = this.canvas_offscreen.getContext('2d');
         this.context = this.els.canvas.getContext('2d');
         this.matrix = this.generate();
-        // this.interval = window.requestAnimationFrame(this.render.bind(this));
-        // this.interval = setInterval(this.render.bind(this),10);
-        this.render();
-        // this.frame_timeout = setTimeout(this.render.bind(this),8);
-        this.interval_fps = setInterval(this.handleFpsInterval.bind(this),1000);
+        this.interval = window.requestAnimationFrame(this.render.bind(this));
+        // this.interval_fps = setInterval(this.handleFpsInterval.bind(this),1000);
       }
-      handleFpsInterval(){
-        this.els.fps.innerHTML = `${this.fps} Frames / Second`;
-        this.fps = 0;
-      }
+      // handleFpsInterval(){
+      //   this.els.fps.innerHTML = `${this.fps} Frames / Second`;
+      //   this.fps = 0;
+      // }
       async render(){
         this.context.clearRect(0, 0, this.width, this.height);
         this.context_offscreen.clearRect(0, 0, this.width, this.height);
@@ -108,8 +99,8 @@
             if(x === this.matrix.length - 1 && y === column.glyphs.length - 1) {
               this.fps++;
               await this.context.drawImage(this.canvas_offscreen, 0, 0);
-              this.frame_timeout = setTimeout(this.render.bind(this),8);
-              // this.interval = window.requestAnimationFrame(this.render.bind(this));
+              // this.frame_timeout = setTimeout(this.render.bind(this),8);
+              this.interval = window.requestAnimationFrame(this.render.bind(this));
             }
           }
         }
