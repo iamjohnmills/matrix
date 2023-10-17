@@ -28,7 +28,7 @@
         window.addEventListener('resize',this.init.bind(this));
         document.addEventListener('DOMContentLoaded',this.init.bind(this));
         this.glyphs = ['モ','エ','ヤ','キ','オ','カ','7','ケ','サ','ス','z','1','5','2','ヨ','タ','ワ','4','ネ','ヌ','ナ','9','8','ヒ','0','ホ','ア','3','ウ',' ','セ','¦',':','"','꞊','ミ','ラ','リ','╌','ツ','テ','ニ','ハ','ソ','▪','—','<','>','0','|','+','*','コ','シ','マ','ム','メ'];
-        this.message = 'GITHUB.COM/IAMJOHNMILLS';
+        this.message = 'THE MATRIX';
         this.glyph_size = 12;
         this.trail_length = 25;
         this.alpha_step = (1 / this.trail_length) * 100;
@@ -36,8 +36,8 @@
       }
       async init(){
         if(this.interval) cancelAnimationFrame(this.interval);
-        this.width = window.innerWidth;
-        this.height = window.innerHeight;
+        this.width = 800; //window.innerWidth;
+        this.height = 600; // window.innerHeight;
         this.root = document.getElementById('root');
         this.root.innerHTML = ``;
         this.max_columns = Math.ceil(this.width / this.glyph_size);
